@@ -1,18 +1,16 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// ─────────────────────────────────────────────────────────────
-//  STEP 1: Paste your Firebase config here (see README.md)
-// ─────────────────────────────────────────────────────────────
+// Keys are stored securely in Vercel environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyCiXW1Ium_ahCFMbfvRbiHCssIh_ixik9w",
-  authDomain: "massmethod.firebaseapp.com",
-  databaseURL: "https://massmethod-default-rtdb.firebaseio.com",
-  projectId: "massmethod",
-  storageBucket: "massmethod.firebasestorage.app",
-  messagingSenderId: "550528083023",
-  appId: "1:550528083023:web:d51f001b52bd50f1cbf63a",
-  measurementId: "G-8Y56Y7EV1J"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL:       import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
