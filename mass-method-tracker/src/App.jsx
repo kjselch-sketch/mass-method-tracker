@@ -3,46 +3,46 @@ import { db } from "./firebase";
 import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 
 // ─── Program Data ────────────────────────────────────────────
+// Phase 2 — 6-Week Cut / Muscle Preservation
 const PROGRAM = {
   "Push A": {
     subtitle: "Chest & Triceps",
     color: "#1B3A5C",
     accent: "#4A90D9",
     exercises: [
-      { name: "Barbell Bench Press",    sets: 4, target: "4–6 reps",   compound: true,  cue: "Retract scapula, bar to lower chest" },
-      { name: "Incline DB Press",       sets: 3, target: "6–8 reps",   compound: true,  cue: "30–45° incline, slight elbow tuck" },
-      { name: "Cable/Band Chest Fly",   sets: 3, target: "10–12 reps", compound: false, cue: "Full stretch at extension" },
-      { name: "Tricep Dips (weighted)", sets: 3, target: "6–8 reps",   compound: false, cue: "Slight forward lean" },
-      { name: "Band Tricep Pushdown",   sets: 2, target: "12–15 reps", compound: false, cue: "Elbows locked, full extension" },
-      { name: "Hanging Leg Raise",      sets: 3, target: "10–12 reps", compound: false, cue: "Posterior pelvic tilt, slow lower" },
+      { name: "Barbell Bench Press",         sets: 4, target: "4–6 reps",      compound: true,  cue: "Retract scapula, bar to lower chest, drive feet into floor" },
+      { name: "Incline DB Press",            sets: 3, target: "6–8 reps",      compound: true,  cue: "30–45° incline, slight elbow tuck, touch upper chest" },
+      { name: "Low-to-High Cable Fly",       sets: 3, target: "10–12 reps",    compound: false, cue: "Anchor low, cross at shoulder height, serratus stretch at bottom" },
+      { name: "Weighted Dips",               sets: 3, target: "6–8 reps",      compound: false, cue: "Slight forward lean to bias chest, controlled descent" },
+      { name: "KB Rolling Tricep Extension", sets: 3, target: "10–12 reps",    compound: false, cue: "Floor-based, roll KB back on eccentric, long head stretch" },
+      { name: "Band Tricep Pushdown",        sets: 2, target: "15 reps",       compound: false, cue: "Elbows pinned, full extension, slow return" },
     ],
   },
-  "Pull A": {
+  "Pull": {
     subtitle: "Back & Biceps",
     color: "#1B4D3E",
     accent: "#4ABF8A",
     exercises: [
-      { name: "Barbell Pendlay Row",   sets: 4, target: "4–6 reps",   compound: true,  cue: "Bar from floor each rep, 45° hinge" },
-      { name: "Weighted Pull-Up",      sets: 3, target: "5–7 reps",   compound: true,  cue: "Dead hang start, chest to bar" },
-      { name: "Seated Cable Row",      sets: 3, target: "8–10 reps",  compound: false, cue: "Drive elbows back, pause at end" },
-      { name: "Band Pull-Apart",       sets: 3, target: "15 reps",    compound: false, cue: "Arms straight, squeeze rear delts" },
-      { name: "Band Face Pull",        sets: 3, target: "12–15 reps", compound: false, cue: "External rotate at end range" },
-      { name: "EZ-Bar Curl",           sets: 3, target: "8–10 reps",  compound: false, cue: "Full ROM, no swing" },
-      { name: "Cable Crunch/Ab Wheel", sets: 3, target: "12 reps",    compound: false, cue: "Round spine, chin to chest" },
+      { name: "Barbell Pendlay Row",         sets: 4, target: "4–6 reps",      compound: true,  cue: "Bar from floor each rep, 45° hinge, drive elbows to ceiling" },
+      { name: "Weighted Pull-Up",            sets: 3, target: "5–7 reps",      compound: true,  cue: "Dead hang start, chest to bar, full scapular depression at top" },
+      { name: "Chest-Supported DB Row",      sets: 3, target: "8–10 reps",     compound: false, cue: "Prone on incline bench — full stretch at bottom, elbow past hip" },
+      { name: "Band Face Pull",              sets: 3, target: "15 reps",       compound: false, cue: "External rotate at end range, thumbs behind ears" },
+      { name: "Meadows Row",                 sets: 2, target: "10 reps/side",  compound: false, cue: "Staggered stance, landmine single-arm, drive elbow past hip" },
+      { name: "Incline DB Curl",             sets: 3, target: "10–12 reps",    compound: false, cue: "45–60° incline, arms hang behind body — full long-head stretch" },
+      { name: "Band Hammer Curl",            sets: 2, target: "12 reps",       compound: false, cue: "Neutral grip, controlled eccentric, elbows fixed" },
     ],
   },
-  "Legs": {
-    subtitle: "Quads, Hams & Glutes",
+  "Legs A": {
+    subtitle: "Squat / Quad Emphasis",
     color: "#3D1A5C",
     accent: "#A06BD9",
     exercises: [
-      { name: "Barbell Back Squat",   sets: 4, target: "4–6 reps",   compound: true,  cue: "Brace hard, knees out, drive hips" },
-      { name: "Romanian Deadlift",    sets: 3, target: "6–8 reps",   compound: true,  cue: "Hip hinge, feel hamstring stretch" },
-      { name: "Leg Press",            sets: 3, target: "8–10 reps",  compound: false, cue: "High/wide foot placement for glutes" },
-      { name: "Walking Lunges (DB)",  sets: 3, target: "8/leg",      compound: false, cue: "Knee tracks toe, upright torso" },
-      { name: "Band Hip Abduction",   sets: 3, target: "15 reps",    compound: false, cue: "Slight lean, control the return" },
-      { name: "Standing Calf Raise",  sets: 4, target: "10–12 reps", compound: false, cue: "Full stretch, 3 sec eccentric" },
-      { name: "Plank (weighted)",     sets: 3, target: "45 sec",     compound: false, cue: "Neutral spine, posterior tilt" },
+      { name: "Barbell Back Squat",          sets: 4, target: "4–6 reps",      compound: true,  cue: "Brace hard, knees out, drive hips — this is the one to push" },
+      { name: "Leg Press (narrow/low foot)", sets: 3, target: "8–10 reps",     compound: true,  cue: "Narrow stance, lower foot position — quad emphasis, full ROM" },
+      { name: "KB Bulgarian Split Squat",    sets: 3, target: "8 reps/leg",    compound: false, cue: "Front foot elevated, upright torso, knee tracks toe, feel quad stretch" },
+      { name: "Leg Extension",               sets: 3, target: "10–12 reps",    compound: false, cue: "Control eccentric, don't slam lockout, pause and squeeze at top" },
+      { name: "Band Lateral Walk",           sets: 2, target: "20 steps",      compound: false, cue: "Hip-width stance, slight sit, resist band pulling knees in" },
+      { name: "Standing Calf Raise",         sets: 3, target: "10–12 reps",    compound: false, cue: "Full stretch at bottom, 3-sec eccentric, pause at top" },
     ],
   },
   "Push B": {
@@ -50,33 +50,34 @@ const PROGRAM = {
     color: "#1B3A5C",
     accent: "#4A90D9",
     exercises: [
-      { name: "Barbell Overhead Press",       sets: 4, target: "4–6 reps",   compound: true,  cue: "Bar clears chin, lock out overhead" },
-      { name: "DB Arnold Press",              sets: 3, target: "8–10 reps",  compound: false, cue: "Rotate from neutral to pronated" },
-      { name: "Cable Lateral Raise",          sets: 3, target: "12–15 reps", compound: false, cue: "Lead with elbow, slight forward lean" },
-      { name: "Band Rear Delt Pull-Apart",    sets: 3, target: "15 reps",    compound: false, cue: "Arms straight, retract at end" },
-      { name: "Incline DB Press (secondary)", sets: 3, target: "8–10 reps",  compound: false, cue: "Lighter than Day 1" },
-      { name: "Overhead Tricep Extension",    sets: 3, target: "8–10 reps",  compound: false, cue: "Long head stretch at bottom" },
-      { name: "Side Plank + Hip Dip",         sets: 3, target: "12/side",    compound: false, cue: "Stack feet, no hip sag" },
+      { name: "Barbell Overhead Press",      sets: 4, target: "4–6 reps",      compound: true,  cue: "Bar clears chin, lock out overhead, ribcage down, no back arch" },
+      { name: "Single-Arm Landmine Press",   sets: 3, target: "8–10 reps/side", compound: true, cue: "Half-kneeling if possible — angled bar path, anterior delt + upper chest tie-in" },
+      { name: "Cable Lateral Raise",         sets: 3, target: "12–15 reps",    compound: false, cue: "Lead with elbow, slight forward lean, cable anchored below hip" },
+      { name: "Band Rear Delt Pull-Apart",   sets: 3, target: "15 reps",       compound: false, cue: "Arms straight, pull to chest height, squeeze rear delts at end" },
+      { name: "KB Bottoms-Up Press",         sets: 2, target: "6–8 reps/side", compound: false, cue: "Grip KB inverted — rotator cuff fires to stabilize, press slow and controlled" },
+      { name: "Band Pushdown",               sets: 2, target: "15 reps",       compound: false, cue: "Elbows pinned, full extension, tricep finisher" },
     ],
   },
-  "Pull B": {
-    subtitle: "Back & Deadlift",
-    color: "#1B4D3E",
-    accent: "#4ABF8A",
+  "Legs B + Core": {
+    subtitle: "Hinge / Hamstrings + Core Block",
+    color: "#3D1A5C",
+    accent: "#A06BD9",
     exercises: [
-      { name: "Deadlift (Conv/Trap Bar)",   sets: 4, target: "3–5 reps",   compound: true,  cue: "Big air, hips through, bar stays close" },
-      { name: "Single-Arm DB Row",          sets: 3, target: "8–10/arm",   compound: true,  cue: "Elbow past hip, full stretch at bottom" },
-      { name: "Band Straight-Arm Pulldown", sets: 3, target: "12–15 reps", compound: false, cue: "Hinge slightly, arms straight, squeeze lats" },
-      { name: "Band Face Pull",             sets: 3, target: "15 reps",    compound: false, cue: "External rotate at end range" },
-      { name: "DB Hammer Curl",             sets: 3, target: "10–12 reps", compound: false, cue: "Neutral grip, controlled eccentric" },
-      { name: "Incline DB Curl",            sets: 2, target: "10–12 reps", compound: false, cue: "Full stretch on incline bench" },
-      { name: "Hanging Knee Raise",         sets: 3, target: "12 reps",    compound: false, cue: "Control the swing, posterior tilt" },
+      { name: "Romanian Deadlift",           sets: 4, target: "5–7 reps",      compound: true,  cue: "Hip hinge, push hips back, feel hamstring stretch, bar stays close to body" },
+      { name: "Lying Leg Curl",              sets: 3, target: "8–10 reps",     compound: false, cue: "2-sec eccentric, squeeze at peak, don't let hips rise off pad" },
+      { name: "KB Sumo Deadlift",            sets: 3, target: "8–10 reps",     compound: false, cue: "Wide stance, drive knees out, keep chest tall, KB between legs" },
+      { name: "Zercher Squat",               sets: 3, target: "6–8 reps",      compound: false, cue: "Bar in crook of elbows, upright torso, brace hard — deep squat, quad + anterior core" },
+      { name: "Seated Calf Raise",           sets: 3, target: "12–15 reps",    compound: false, cue: "Soleus emphasis — full stretch, slow and controlled" },
+      { name: "Ab Wheel / Cable Crunch",     sets: 3, target: "10–12 reps",    compound: false, cue: "Anti-extension — round spine, chin to chest, slow return from full stretch" },
+      { name: "Hanging Leg Raise",           sets: 3, target: "8–12 reps",     compound: false, cue: "Posterior pelvic tilt, slow lower, zero swing" },
+      { name: "Pallof Press",                sets: 3, target: "10 reps/side",  compound: false, cue: "Anti-rotation — anchor at chest height, press out and resist the pull back in" },
+      { name: "Cable / Band Woodchop",       sets: 3, target: "10 reps/side",  compound: false, cue: "Anchor at shoulder height, rotate through hip, resist the return — oblique sling" },
     ],
   },
 };
 
 const DAYS = Object.keys(PROGRAM);
-const WEEKS = Array.from({ length: 12 }, (_, i) => i + 1);
+const WEEKS = Array.from({ length: 6 }, (_, i) => i + 1);
 
 function logKey(day, week, exIdx, setIdx, field) {
   return `${day}__w${week}__e${exIdx}__s${setIdx}__${field}`;
@@ -250,7 +251,7 @@ export default function GymTracker() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: "#FFF", letterSpacing: 2, lineHeight: 1 }}>MASS METHOD</div>
-            <div style={{ fontFamily: "'DM Sans'", fontSize: 11, color: "#666", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>Push · Pull · Legs — 12 Week</div>
+            <div style={{ fontFamily: "'DM Sans'", fontSize: 11, color: "#666", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>Push · Pull · Legs — Phase 2 · 6 Week</div>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             <button className="nav-btn" onClick={() => setView("workout")}
@@ -301,7 +302,7 @@ export default function GymTracker() {
               <button onClick={() => setActiveWeek(w => Math.max(1, w - 1))} style={{ ...styles.wkBtn, color: day.accent }}>‹</button>
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontFamily: "'Bebas Neue'", fontSize: 20, color: "#FFF", letterSpacing: 1 }}>WK {activeWeek}</div>
-                <div style={{ fontFamily: "'DM Sans'", fontSize: 9, color: "rgba(255,255,255,0.5)" }}>of 12</div>
+                <div style={{ fontFamily: "'DM Sans'", fontSize: 9, color: "rgba(255,255,255,0.5)" }}>of 6</div>
               </div>
               <button onClick={() => setActiveWeek(w => Math.min(12, w + 1))} style={{ ...styles.wkBtn, color: day.accent }}>›</button>
             </div>
@@ -407,7 +408,7 @@ export default function GymTracker() {
 
           {/* Bodyweight chart */}
           <div style={{ borderRadius: 12, border: "1px solid #2A1A1A", background: "#0F0A0A", padding: "14px", marginBottom: 12 }}>
-            <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 13, color: "#D4A017", marginBottom: 10 }}>⚖️ Bodyweight (lbs) — Goal: 194 → 184</div>
+            <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 13, color: "#D4A017", marginBottom: 10 }}>⚖️ Bodyweight (lbs) — Goal: 190 → 180</div>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60 }}>
               {WEEKS.map(w => {
                 const bw = parseFloat(bodyweights[w]);
@@ -418,7 +419,7 @@ export default function GymTracker() {
                 const h = isNaN(bw) ? 4 : Math.max(4, ((bw - minBw) / range) * 50 + 10);
                 return (
                   <div key={w} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                    <div style={{ width: "100%", background: isNaN(bw) ? "#1A1A1A" : bw <= 184 ? "#4ABF8A" : "#D4A017", height: h, borderRadius: "3px 3px 0 0" }} />
+                    <div style={{ width: "100%", background: isNaN(bw) ? "#1A1A1A" : bw <= 180 ? "#4ABF8A" : "#D4A017", height: h, borderRadius: "3px 3px 0 0" }} />
                     <div style={{ fontFamily: "'DM Sans'", fontSize: 8, color: "#444" }}>{w}</div>
                   </div>
                 );
@@ -434,12 +435,12 @@ export default function GymTracker() {
 
           {/* Key lifts */}
           {[
-            { day: "Push A", ex: 0, label: "Bench Press" },
-            { day: "Push B", ex: 0, label: "Overhead Press" },
-            { day: "Legs",   ex: 0, label: "Back Squat" },
-            { day: "Legs",   ex: 1, label: "Romanian DL" },
-            { day: "Pull B", ex: 0, label: "Deadlift" },
-            { day: "Pull A", ex: 0, label: "Pendlay Row" },
+            { day: "Push A",        ex: 0, label: "Bench Press" },
+            { day: "Push B",        ex: 0, label: "Overhead Press" },
+            { day: "Legs A",        ex: 0, label: "Back Squat" },
+            { day: "Legs B + Core", ex: 0, label: "Romanian DL" },
+            { day: "Pull",          ex: 0, label: "Pendlay Row" },
+            { day: "Pull",          ex: 1, label: "Weighted Pull-Up" },
           ].map(({ day: d, ex: ei, label }) => {
             const prog = PROGRAM[d];
             const ex = prog.exercises[ei];
