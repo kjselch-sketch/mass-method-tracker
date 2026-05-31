@@ -140,7 +140,7 @@ function SyncCodeScreen({ onEnter }) {
 // ─── Main Tracker ─────────────────────────────────────────────
 export default function GymTracker() {
   const [syncCode, setSyncCode] = useState(() => localStorage.getItem("mass-sync-code") || null);
-  const [activeDay, setActiveDay] = useState("Push A");
+  const [activeDay, setActiveDay] = useState("Push Day 1");
   const [activeWeek, setActiveWeek] = useState(1);
   const [logs, setLogs] = useState({});
   const [bodyweights, setBodyweights] = useState({});
@@ -432,12 +432,12 @@ export default function GymTracker() {
 
           {/* Key lifts */}
           {[
-            { day: "Push A",        ex: 0, label: "Bench Press" },
-            { day: "Push B",        ex: 0, label: "Overhead Press" },
-            { day: "Legs A",        ex: 0, label: "Back Squat" },
-            { day: "Legs B + Core", ex: 0, label: "Romanian DL" },
-            { day: "Pull",          ex: 0, label: "Pendlay Row" },
-            { day: "Pull",          ex: 1, label: "Weighted Pull-Up" },
+            { day: "Push Day 1", ex: 0, label: "Smith Bench Press" },
+            { day: "Push Day 2", ex: 0, label: "Overhead Press" },
+            { day: "Leg Day 1",  ex: 0, label: "Back Squat" },
+            { day: "Leg Day 2",  ex: 0, label: "Romanian DL" },
+            { day: "Pull Day 1", ex: 0, label: "Weighted Pull-Ups" },
+            { day: "Pull Day 1", ex: 1, label: "Single Arm Row" },
           ].map(({ day: d, ex: ei, label }) => {
             const prog = PROGRAM[d];
             const ex = prog.exercises[ei];
