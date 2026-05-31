@@ -3,75 +3,72 @@ import { db } from "./firebase";
 import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 
 // ─── Program Data ────────────────────────────────────────────
-// Phase 2 — 6-Week Cut / Muscle Preservation
+// Updated Workout Program
 const PROGRAM = {
-  "Push A": {
-    subtitle: "Chest & Triceps",
+  "Push Day 1": {
+    subtitle: "Chest Focus",
     color: "#1B3A5C",
     accent: "#4A90D9",
     exercises: [
-      { name: "Barbell Bench Press",         sets: 4, target: "4–6 reps",      compound: true,  cue: "Retract scapula, bar to lower chest, drive feet into floor" },
-      { name: "Incline DB Press",            sets: 3, target: "6–8 reps",      compound: true,  cue: "30–45° incline, slight elbow tuck, touch upper chest" },
-      { name: "Low-to-High Cable Fly",       sets: 3, target: "10–12 reps",    compound: false, cue: "Anchor low, cross at shoulder height, serratus stretch at bottom" },
-      { name: "Weighted Dips",               sets: 3, target: "6–8 reps",      compound: false, cue: "Slight forward lean to bias chest, controlled descent" },
-      { name: "KB Rolling Tricep Extension", sets: 3, target: "10–12 reps",    compound: false, cue: "Floor-based, roll KB back on eccentric, long head stretch" },
-      { name: "Band Tricep Pushdown",        sets: 2, target: "15 reps",       compound: false, cue: "Elbows pinned, full extension, slow return" },
+      { name: "Smith Machine Flat Bench Press", sets: 4, target: "4–6 reps", compound: true,  cue: "Control the descent, full ROM, drive through chest at top" },
+      { name: "Incline Chest Machine",          sets: 3, target: "8–10 reps", compound: true,  cue: "Set seat so handles align with upper chest, squeeze at top" },
+      { name: "Pec Deck / Cable Fly",           sets: 3, target: "12–15 reps", compound: false, cue: "Controlled arc, feel stretch at bottom, squeeze at peak" },
+      { name: "Weighted Dips",                  sets: 3, target: "8–10 reps", compound: false, cue: "Slight forward lean to bias chest, controlled descent" },
+      { name: "Preacher Curl Tricep Press",     sets: 3, target: "10–12 reps", compound: false, cue: "Elbows on pad, full extension, slow eccentric" },
+      { name: "Single Arm Cable Tricep Pulldown", sets: 3, target: "12–15 reps", compound: false, cue: "Elbow pinned, full lockout, resist on the way back up" },
     ],
   },
-  "Pull": {
+  "Pull Day 1": {
     subtitle: "Back & Biceps",
     color: "#1B4D3E",
     accent: "#4ABF8A",
     exercises: [
-      { name: "Barbell Pendlay Row",         sets: 4, target: "4–6 reps",      compound: true,  cue: "Bar from floor each rep, 45° hinge, drive elbows to ceiling" },
-      { name: "Weighted Pull-Up",            sets: 3, target: "5–7 reps",      compound: true,  cue: "Dead hang start, chest to bar, full scapular depression at top" },
-      { name: "Chest-Supported DB Row",      sets: 3, target: "8–10 reps",     compound: false, cue: "Prone on incline bench — full stretch at bottom, elbow past hip" },
-      { name: "Band Face Pull",              sets: 3, target: "15 reps",       compound: false, cue: "External rotate at end range, thumbs behind ears" },
-      { name: "Meadows Row",                 sets: 2, target: "10 reps/side",  compound: false, cue: "Staggered stance, landmine single-arm, drive elbow past hip" },
-      { name: "Incline DB Curl",             sets: 3, target: "10–12 reps",    compound: false, cue: "45–60° incline, arms hang behind body — full long-head stretch" },
-      { name: "Band Hammer Curl",            sets: 2, target: "12 reps",       compound: false, cue: "Neutral grip, controlled eccentric, elbows fixed" },
+      { name: "Weighted Pull-Ups",               sets: 4, target: "4–6 reps",    compound: true,  cue: "Dead hang start, chest to bar, full scapular depression at top" },
+      { name: "Single Arm DB or Cable Row",      sets: 4, target: "8–10 reps",   compound: true,  cue: "Brace core, drive elbow past hip, full stretch at bottom" },
+      { name: "Chest-Supported Machine Row",     sets: 3, target: "10–12 reps",  compound: false, cue: "Chest on pad, retract scapula, squeeze at peak contraction" },
+      { name: "Wide Grip Lat Pulldown",          sets: 3, target: "10–12 reps",  compound: false, cue: "Slight lean back, pull to upper chest, stretch lats at top" },
+      { name: "Straight Arm Cable Pulldown",     sets: 3, target: "12–15 reps",  compound: false, cue: "Arms straight, hinge at shoulder, pull to hips — lat isolation" },
+      { name: "Barbell or Machine Bicep Curl",   sets: 3, target: "10–12 reps",  compound: false, cue: "Elbows fixed, supinate at top, controlled eccentric" },
+      { name: "Hammer Curl",                     sets: 2, target: "12–15 reps",  compound: false, cue: "Neutral grip, controlled eccentric, elbows fixed at sides" },
     ],
   },
-  "Legs A": {
-    subtitle: "Squat / Quad Emphasis",
+  "Leg Day 1": {
+    subtitle: "Quad Focus",
     color: "#3D1A5C",
     accent: "#A06BD9",
     exercises: [
-      { name: "Barbell Back Squat",          sets: 4, target: "4–6 reps",      compound: true,  cue: "Brace hard, knees out, drive hips — this is the one to push" },
-      { name: "Leg Press (narrow/low foot)", sets: 3, target: "8–10 reps",     compound: true,  cue: "Narrow stance, lower foot position — quad emphasis, full ROM" },
-      { name: "KB Bulgarian Split Squat",    sets: 3, target: "8 reps/leg",    compound: false, cue: "Front foot elevated, upright torso, knee tracks toe, feel quad stretch" },
-      { name: "Leg Extension",               sets: 3, target: "10–12 reps",    compound: false, cue: "Control eccentric, don't slam lockout, pause and squeeze at top" },
-      { name: "Band Lateral Walk",           sets: 2, target: "20 steps",      compound: false, cue: "Hip-width stance, slight sit, resist band pulling knees in" },
-      { name: "Standing Calf Raise",         sets: 3, target: "10–12 reps",    compound: false, cue: "Full stretch at bottom, 3-sec eccentric, pause at top" },
+      { name: "Back Squat",                        sets: 4, target: "4–6 reps",     compound: true,  cue: "Brace hard, knees out, drive hips — push the floor away" },
+      { name: "Bulgarian Split Squat (Smith)",     sets: 3, target: "8–10 reps ea", compound: true,  cue: "Front foot elevated, upright torso, knee tracks toe, feel quad stretch" },
+      { name: "Leg Extension",                     sets: 3, target: "12–15 reps",   compound: false, cue: "Control eccentric, pause and squeeze at top, don't slam lockout" },
+      { name: "GHD Hamstring Curl",                sets: 3, target: "8–12 reps",    compound: false, cue: "Full extension at start, curl heel to glute, controlled return" },
+      { name: "Band Abductor/Adductor",            sets: 2, target: "15–20 reps ea", compound: false, cue: "Controlled throughout, feel tension in glutes/inner thigh" },
+      { name: "Calf Raises",                       sets: 4, target: "15–20 reps",   compound: false, cue: "Full stretch at bottom, 2-sec pause at top, controlled descent" },
     ],
   },
-  "Push B": {
-    subtitle: "Shoulders & Triceps",
+  "Push Day 2": {
+    subtitle: "Shoulder Focus",
     color: "#1B3A5C",
     accent: "#4A90D9",
     exercises: [
-      { name: "Barbell Overhead Press",      sets: 4, target: "4–6 reps",      compound: true,  cue: "Bar clears chin, lock out overhead, ribcage down, no back arch" },
-      { name: "Single-Arm Landmine Press",   sets: 3, target: "8–10 reps/side", compound: true, cue: "Half-kneeling if possible — angled bar path, anterior delt + upper chest tie-in" },
-      { name: "Cable Lateral Raise",         sets: 3, target: "12–15 reps",    compound: false, cue: "Lead with elbow, slight forward lean, cable anchored below hip" },
-      { name: "Band Rear Delt Pull-Apart",   sets: 3, target: "15 reps",       compound: false, cue: "Arms straight, pull to chest height, squeeze rear delts at end" },
-      { name: "KB Bottoms-Up Press",         sets: 2, target: "6–8 reps/side", compound: false, cue: "Grip KB inverted — rotator cuff fires to stabilize, press slow and controlled" },
-      { name: "Band Pushdown",               sets: 2, target: "15 reps",       compound: false, cue: "Elbows pinned, full extension, tricep finisher" },
+      { name: "Barbell Overhead Press",           sets: 4, target: "4–6 reps",     compound: true,  cue: "Bar clears chin, lock out overhead, ribcage down, no back arch" },
+      { name: "Single Arm Landmine Press",        sets: 3, target: "8–10 reps ea", compound: true,  cue: "Half-kneeling if possible — angled bar path, anterior delt + upper chest tie-in" },
+      { name: "Side Cable Lateral Raise",         sets: 3, target: "15–20 reps",   compound: false, cue: "Lead with elbow, slight forward lean, cable anchored below hip" },
+      { name: "Face Pulls",                       sets: 3, target: "15–20 reps",   compound: false, cue: "External rotate at end range, thumbs behind ears, squeeze rear delts" },
+      { name: "Rear Delt Cable Fly",              sets: 3, target: "15–20 reps",   compound: false, cue: "Arms straight, pull across body, focus on rear delt contraction" },
+      { name: "Single Arm Cable Tricep Pulldown", sets: 3, target: "12–15 reps",   compound: false, cue: "Elbow pinned, full lockout, resist on the way back up" },
     ],
   },
-  "Legs B + Core": {
-    subtitle: "Hinge / Hamstrings + Core Block",
+  "Leg Day 2": {
+    subtitle: "Posterior Chain & Abs",
     color: "#3D1A5C",
     accent: "#A06BD9",
     exercises: [
-      { name: "Romanian Deadlift",           sets: 4, target: "5–7 reps",      compound: true,  cue: "Hip hinge, push hips back, feel hamstring stretch, bar stays close to body" },
-      { name: "Lying Leg Curl",              sets: 3, target: "8–10 reps",     compound: false, cue: "2-sec eccentric, squeeze at peak, don't let hips rise off pad" },
-      { name: "KB Sumo Deadlift",            sets: 3, target: "8–10 reps",     compound: false, cue: "Wide stance, drive knees out, keep chest tall, KB between legs" },
-      { name: "Zercher Squat",               sets: 3, target: "6–8 reps",      compound: false, cue: "Bar in crook of elbows, upright torso, brace hard — deep squat, quad + anterior core" },
-      { name: "Seated Calf Raise",           sets: 3, target: "12–15 reps",    compound: false, cue: "Soleus emphasis — full stretch, slow and controlled" },
-      { name: "Ab Wheel / Cable Crunch",     sets: 3, target: "10–12 reps",    compound: false, cue: "Anti-extension — round spine, chin to chest, slow return from full stretch" },
-      { name: "Hanging Leg Raise",           sets: 3, target: "8–12 reps",     compound: false, cue: "Posterior pelvic tilt, slow lower, zero swing" },
-      { name: "Pallof Press",                sets: 3, target: "10 reps/side",  compound: false, cue: "Anti-rotation — anchor at chest height, press out and resist the pull back in" },
-      { name: "Cable / Band Woodchop",       sets: 3, target: "10 reps/side",  compound: false, cue: "Anchor at shoulder height, rotate through hip, resist the return — oblique sling" },
+      { name: "Romanian Deadlift",   sets: 4, target: "6–8 reps",   compound: true,  cue: "Hip hinge, push hips back, feel hamstring stretch, bar stays close to body" },
+      { name: "Zercher Squat",       sets: 3, target: "8–10 reps",  compound: false, cue: "Bar in crook of elbows, upright torso, brace hard — deep squat, quad + anterior core" },
+      { name: "Barbell Hip Thrust",  sets: 3, target: "10–12 reps", compound: false, cue: "Upper back on bench, drive hips to ceiling, squeeze glutes hard at top" },
+      { name: "Hamstring Curl",      sets: 3, target: "12–15 reps", compound: false, cue: "2-sec eccentric, squeeze at peak, don't let hips rise off pad" },
+      { name: "Calf Raises",         sets: 3, target: "15–20 reps", compound: false, cue: "Full stretch at bottom, slow and controlled, pause at top" },
+      { name: "Ab Circuit x3: Cable Crunch 15–20 / Hanging Leg Raise 12–15 / Ab Wheel Rollout 10–12 / Side Plank 30–45s / Plank 45–60s", sets: 3, target: "Circuit", compound: false, cue: "Rest minimally between exercises, 90s between rounds. Posterior tilt on all crunch movements." },
     ],
   },
 };
