@@ -3,59 +3,46 @@ import { db } from "./firebase";
 import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 
 // ─── Program Data ────────────────────────────────────────────
-// Updated Workout Program
+// Updated Workout Program — 5-Day Split, Legs Prioritized
+// Philosophy: fewer sets, working sets taken to (or near) failure, no junk volume.
+// Extra set boxes are provided for ramp/lead-up weights — the LAST 1–2 sets
+// listed in "target" are the true working sets that should be near-max effort.
 const PROGRAM = {
-  "Push Day 1": {
+  "Leg Day 1": {
+    subtitle: "Quad Focus — Machine Priority",
+    color: "#3D1A5C",
+    accent: "#A06BD9",
+    exercises: [
+      { name: "Hack Squat (Machine)",            sets: 4, target: "6–8 reps — last 2 sets are working sets, taken to true failure", compound: true,  cue: "Machine track lets you push closer to real failure safely than a free bar — no spotter needed. Full depth, controlled descent." },
+      { name: "Single-Leg Press (Machine)",      sets: 3, target: "8–10 reps ea leg — final set to near failure", compound: true,  cue: "Foot mid-plate, full ROM each leg, controlled tempo — no bouncing out of the bottom." },
+      { name: "Leg Extension",                   sets: 3, target: "12–15 reps — last set to failure", compound: false, cue: "Pause and squeeze at top, slow eccentric, don't let the stack slam." },
+      { name: "Calf Raises (Machine)",           sets: 3, target: "12–15 reps — last set to failure", compound: false, cue: "Full stretch at bottom, 1–2 sec pause at top, controlled throughout." },
+    ],
+  },
+  "Push Day": {
     subtitle: "Chest Focus",
     color: "#1B3A5C",
     accent: "#4A90D9",
     exercises: [
-      { name: "Smith Machine Flat Bench Press", sets: 4, target: "4–6 reps", compound: true,  cue: "Control the descent, full ROM, drive through chest at top" },
-      { name: "Incline Chest Machine",          sets: 3, target: "8–10 reps", compound: true,  cue: "Set seat so handles align with upper chest, squeeze at top" },
-      { name: "Pec Deck / Cable Fly",           sets: 3, target: "12–15 reps", compound: false, cue: "Controlled arc, feel stretch at bottom, squeeze at peak" },
-      { name: "Weighted Dips",                  sets: 3, target: "8–10 reps", compound: false, cue: "Slight forward lean to bias chest, controlled descent" },
-      { name: "Preacher Curl Tricep Press",     sets: 3, target: "10–12 reps", compound: false, cue: "Elbows on pad, full extension, slow eccentric" },
-      { name: "Single Arm Cable Tricep Pulldown", sets: 3, target: "12–15 reps", compound: false, cue: "Elbow pinned, full lockout, resist on the way back up" },
+      { name: "Incline Smith Machine Press",      sets: 4, target: "4–6 reps — last 2 sets are working sets, near failure", compound: true,  cue: "Set bench so bar lines up with upper chest. Control the descent, drive with intent." },
+      { name: "Machine Chest Press",              sets: 3, target: "6–8 reps — last set to failure", compound: true,  cue: "Seat height so handles align mid-chest, full stretch back, squeeze at lockout." },
+      { name: "Pec Deck / Cable Fly",              sets: 3, target: "10–12 reps — last set to failure", compound: false, cue: "Controlled arc, stretch at the bottom, squeeze and hold briefly at peak." },
+      { name: "Weighted Dips",                     sets: 3, target: "6–10 reps — last set to failure", compound: true,  cue: "Slight forward lean to bias chest, full stretch at bottom, controlled tempo." },
+      { name: "Seated Dumbbell Tricep Extension",  sets: 3, target: "10–12 reps — last set to failure", compound: false, cue: "Seated upright, elbows fixed and close to head, full stretch behind the neck, squeeze at lockout." },
+      { name: "Two-Arm Cable Pushdown",            sets: 3, target: "12–15 reps — last set to failure", compound: false, cue: "Elbows pinned to sides, full lockout, resist the eccentric on the way back up." },
     ],
   },
-  "Pull Day 1": {
-    subtitle: "Back & Biceps",
+  "Pull Day": {
+    subtitle: "Back & Arms",
     color: "#1B4D3E",
     accent: "#4ABF8A",
     exercises: [
-      { name: "Weighted Pull-Ups",               sets: 4, target: "4–6 reps",    compound: true,  cue: "Dead hang start, chest to bar, full scapular depression at top" },
-      { name: "Single Arm DB or Cable Row",      sets: 4, target: "8–10 reps",   compound: true,  cue: "Brace core, drive elbow past hip, full stretch at bottom" },
-      { name: "Chest-Supported Machine Row",     sets: 3, target: "10–12 reps",  compound: false, cue: "Chest on pad, retract scapula, squeeze at peak contraction" },
-      { name: "Wide Grip Lat Pulldown",          sets: 3, target: "10–12 reps",  compound: false, cue: "Slight lean back, pull to upper chest, stretch lats at top" },
-      { name: "Straight Arm Cable Pulldown",     sets: 3, target: "12–15 reps",  compound: false, cue: "Arms straight, hinge at shoulder, pull to hips — lat isolation" },
-      { name: "Barbell or Machine Bicep Curl",   sets: 3, target: "10–12 reps",  compound: false, cue: "Elbows fixed, supinate at top, controlled eccentric" },
-      { name: "Hammer Curl",                     sets: 2, target: "12–15 reps",  compound: false, cue: "Neutral grip, controlled eccentric, elbows fixed at sides" },
-    ],
-  },
-  "Leg Day 1": {
-    subtitle: "Quad Focus",
-    color: "#3D1A5C",
-    accent: "#A06BD9",
-    exercises: [
-      { name: "Back Squat",                        sets: 4, target: "4–6 reps",     compound: true,  cue: "Brace hard, knees out, drive hips — push the floor away" },
-      { name: "Bulgarian Split Squat (Smith)",     sets: 3, target: "8–10 reps ea", compound: true,  cue: "Front foot elevated, upright torso, knee tracks toe, feel quad stretch" },
-      { name: "Leg Extension",                     sets: 3, target: "12–15 reps",   compound: false, cue: "Control eccentric, pause and squeeze at top, don't slam lockout" },
-      { name: "GHD Hamstring Curl",                sets: 3, target: "8–12 reps",    compound: false, cue: "Full extension at start, curl heel to glute, controlled return" },
-      { name: "Band Abductor/Adductor",            sets: 2, target: "15–20 reps ea", compound: false, cue: "Controlled throughout, feel tension in glutes/inner thigh" },
-      { name: "Calf Raises",                       sets: 4, target: "15–20 reps",   compound: false, cue: "Full stretch at bottom, 2-sec pause at top, controlled descent" },
-    ],
-  },
-  "Push Day 2": {
-    subtitle: "Shoulder Focus",
-    color: "#1B3A5C",
-    accent: "#4A90D9",
-    exercises: [
-      { name: "Barbell Overhead Press",           sets: 4, target: "4–6 reps",     compound: true,  cue: "Bar clears chin, lock out overhead, ribcage down, no back arch" },
-      { name: "Single Arm Landmine Press",        sets: 3, target: "8–10 reps ea", compound: true,  cue: "Half-kneeling if possible — angled bar path, anterior delt + upper chest tie-in" },
-      { name: "Side Cable Lateral Raise",         sets: 3, target: "15–20 reps",   compound: false, cue: "Lead with elbow, slight forward lean, cable anchored below hip" },
-      { name: "Face Pulls",                       sets: 3, target: "15–20 reps",   compound: false, cue: "External rotate at end range, thumbs behind ears, squeeze rear delts" },
-      { name: "Rear Delt Cable Fly",              sets: 3, target: "15–20 reps",   compound: false, cue: "Arms straight, pull across body, focus on rear delt contraction" },
-      { name: "Single Arm Cable Tricep Pulldown", sets: 3, target: "12–15 reps",   compound: false, cue: "Elbow pinned, full lockout, resist on the way back up" },
+      { name: "Single-Arm Cable Row",             sets: 4, target: "6–8 reps ea — last 2 sets are working sets, near failure", compound: true,  cue: "Brace core, drive elbow past hip, full stretch at the front, squeeze at the back." },
+      { name: "Weighted Pull-Ups",                sets: 3, target: "4–6 reps — last set to true failure", compound: true,  cue: "Dead hang start, chest to bar, full scapular depression at the top." },
+      { name: "Single-Arm Lat Pulldown",          sets: 3, target: "8–10 reps ea — last set to near failure", compound: false, cue: "Slight lean back, pull to the ribs, stretch fully at the top." },
+      { name: "Chest-Supported Row (Machine)",    sets: 3, target: "8–10 reps — last set to failure", compound: false, cue: "Chest pinned to pad, retract scapula first, squeeze hard at peak contraction." },
+      { name: "Seated Curl",                      sets: 3, target: "10–12 reps — last set to failure", compound: false, cue: "Seated to kill momentum, full stretch at bottom, controlled eccentric." },
+      { name: "Reverse-Grip Cable Curl",          sets: 3, target: "12–15 reps — last set to failure", compound: false, cue: "Overhand grip, elbows fixed — targets forearm/brachioradialis for arm size." },
     ],
   },
   "Leg Day 2": {
@@ -63,29 +50,36 @@ const PROGRAM = {
     color: "#3D1A5C",
     accent: "#A06BD9",
     exercises: [
-      { name: "Romanian Deadlift",   sets: 4, target: "6–8 reps",   compound: true,  cue: "Hip hinge, push hips back, feel hamstring stretch, bar stays close to body" },
-      { name: "Zercher Squat",       sets: 3, target: "8–10 reps",  compound: false, cue: "Bar in crook of elbows, upright torso, brace hard — deep squat, quad + anterior core" },
-      { name: "Barbell Hip Thrust",  sets: 3, target: "10–12 reps", compound: false, cue: "Upper back on bench, drive hips to ceiling, squeeze glutes hard at top" },
-      { name: "Hamstring Curl",      sets: 3, target: "12–15 reps", compound: false, cue: "2-sec eccentric, squeeze at peak, don't let hips rise off pad" },
-      { name: "Calf Raises",         sets: 3, target: "15–20 reps", compound: false, cue: "Full stretch at bottom, slow and controlled, pause at top" },
-      { name: "Ab Circuit x3: Cable Crunch 15–20 / Hanging Leg Raise 12–15 / Ab Wheel Rollout 10–12 / Side Plank 30–45s / Plank 45–60s", sets: 3, target: "Circuit", compound: false, cue: "Rest minimally between exercises, 90s between rounds. Posterior tilt on all crunch movements." },
+      { name: "Romanian Deadlift",                sets: 4, target: "6–8 reps — last 2 sets are working sets, near failure", compound: true,  cue: "Hip hinge, push hips back, feel the hamstring stretch, bar stays close to the body." },
+      { name: "Hip Thrust (Machine)",             sets: 3, target: "8–10 reps — last set to near failure", compound: true,  cue: "Chin tucked, drive through heels, squeeze glutes hard at lockout." },
+      { name: "GHD Hamstring Curl",               sets: 3, target: "8–12 reps — last set to failure", compound: false, cue: "Full extension at the start, curl heel to glute, controlled return." },
+      { name: "Kneeling Cable Crunch",            sets: 3, target: "12–15 reps — last set to failure", compound: false, cue: "Round the spine, crunch down toward hips, posterior pelvic tilt throughout." },
+      { name: "Ab Wheel Rollout",                 sets: 3, target: "8–12 reps — last set to failure", compound: false, cue: "Brace hard, control the extension, don't let the lower back sag." },
+    ],
+  },
+  "Shoulder Day": {
+    subtitle: "Delts & Abs",
+    color: "#5C2E12",
+    accent: "#E8955A",
+    exercises: [
+      { name: "Standing Overhead Press",          sets: 4, target: "4–6 reps — last 2 sets are working sets, near failure", compound: true,  cue: "Bar/DBs clear the chin, lock out overhead, ribcage down, no back arch." },
+      { name: "Single-Arm Cable Lateral Raise",   sets: 3, target: "12–15 reps ea — last set to failure", compound: false, cue: "Lead with the elbow, slight forward lean, cable anchored low." },
+      { name: "Face Pulls",                       sets: 3, target: "12–15 reps — last set to failure", compound: false, cue: "External rotate at end range, thumbs back, squeeze rear delts. (Swap in cross-cable rear delt spreads occasionally for variety.)" },
+      { name: "Hanging Leg Raise",                sets: 3, target: "10–15 reps — last set to failure", compound: false, cue: "Posterior pelvic tilt, controlled — no swinging." },
+      { name: "Pallof Press",                     sets: 3, target: "10–12 reps ea side — last set to failure", compound: false, cue: "Anti-rotation — resist the cable pulling you sideways, brace hard." },
     ],
   },
 };
-
 const DAYS = Object.keys(PROGRAM);
 const WEEKS = Array.from({ length: 6 }, (_, i) => i + 1);
-
 function logKey(day, week, exIdx, setIdx, field) {
   return `${day}__w${week}__e${exIdx}__s${setIdx}__${field}`;
 }
-
 // ─── Sync Code Screen ────────────────────────────────────────
 function SyncCodeScreen({ onEnter }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
-
   const handleSubmit = async () => {
     const trimmed = code.trim().toLowerCase().replace(/\s+/g, "-");
     if (trimmed.length < 3) { setError("Code must be at least 3 characters."); return; }
@@ -101,13 +95,11 @@ function SyncCodeScreen({ onEnter }) {
     }
     setChecking(false);
   };
-
   return (
     <div style={{ background: "#0A0A0A", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap');`}</style>
       <div style={{ fontFamily: "'Bebas Neue'", fontSize: 32, color: "#FFF", letterSpacing: 3, marginBottom: 8 }}>MASS METHOD</div>
       <div style={{ fontSize: 12, color: "#555", letterSpacing: 1, textTransform: "uppercase", marginBottom: 40 }}>Cross-Device Sync</div>
-
       <div style={{ background: "#141414", border: "1px solid #2A2A2A", borderRadius: 16, padding: 28, width: "100%", maxWidth: 340 }}>
         <div style={{ fontSize: 15, color: "#CCC", fontWeight: 600, marginBottom: 6 }}>Enter your sync code</div>
         <div style={{ fontSize: 12, color: "#555", lineHeight: 1.5, marginBottom: 20 }}>
@@ -136,11 +128,10 @@ function SyncCodeScreen({ onEnter }) {
     </div>
   );
 }
-
 // ─── Main Tracker ─────────────────────────────────────────────
 export default function GymTracker() {
   const [syncCode, setSyncCode] = useState(() => localStorage.getItem("mass-sync-code") || null);
-  const [activeDay, setActiveDay] = useState("Push Day 1");
+  const [activeDay, setActiveDay] = useState("Leg Day 1");
   const [activeWeek, setActiveWeek] = useState(1);
   const [logs, setLogs] = useState({});
   const [bodyweights, setBodyweights] = useState({});
@@ -148,14 +139,11 @@ export default function GymTracker() {
   const [showCue, setShowCue] = useState(null);
   const [view, setView] = useState("workout");
   const [syncStatus, setSyncStatus] = useState("connecting"); // connecting | ok | error | saving
-
   const day = PROGRAM[activeDay];
   const saveTimerRef = useRef(null);
   const latestData = useRef({ logs, bodyweights });
-
   // Keep ref in sync
   useEffect(() => { latestData.current = { logs, bodyweights }; }, [logs, bodyweights]);
-
   // ── Real-time listener from Firestore ──
   useEffect(() => {
     if (!syncCode) return;
@@ -173,7 +161,6 @@ export default function GymTracker() {
     );
     return unsub;
   }, [syncCode]);
-
   // ── Debounced save to Firestore ──
   const scheduleSave = useCallback((newLogs, newBw) => {
     setSyncStatus("saving");
@@ -187,9 +174,7 @@ export default function GymTracker() {
       }
     }, 1200);
   }, [syncCode]);
-
   const getLog = (d, w, ei, si, field) => logs[logKey(d, w, ei, si, field)] || "";
-
   const setLog = useCallback((d, w, ei, si, field, value) => {
     setLogs(prev => {
       const next = { ...prev, [logKey(d, w, ei, si, field)]: value };
@@ -197,7 +182,6 @@ export default function GymTracker() {
       return next;
     });
   }, [scheduleSave]);
-
   const setBw = useCallback((w, value) => {
     setBodyweights(prev => {
       const next = { ...prev, [w]: value };
@@ -205,23 +189,18 @@ export default function GymTracker() {
       return next;
     });
   }, [scheduleSave]);
-
   const toggleSet = (ei, si) => {
     const k = `${activeDay}:${activeWeek}:${ei}:${si}`;
     setCompletedSets(prev => ({ ...prev, [k]: !prev[k] }));
   };
   const isSetDone = (ei, si) => !!completedSets[`${activeDay}:${activeWeek}:${ei}:${si}`];
-
   const totalSetsForDay = day.exercises.reduce((a, e) => a + e.sets, 0);
   const doneSets = day.exercises.reduce((a, e, ei) =>
     a + Array.from({ length: e.sets }, (_, si) => isSetDone(ei, si) ? 1 : 0).reduce((x, y) => x + y, 0), 0);
   const pct = Math.round((doneSets / totalSetsForDay) * 100);
-
   const statusColor = { connecting: "#888", ok: "#4ABF8A", saving: "#D4A017", error: "#E74C3C" }[syncStatus];
   const statusText  = { connecting: "⏳ connecting…", ok: "✓ synced", saving: "↑ saving…", error: "⚠ sync error" }[syncStatus];
-
   if (!syncCode) return <SyncCodeScreen onEnter={setSyncCode} />;
-
   return (
     <div style={styles.root}>
       <style>{`
@@ -242,13 +221,12 @@ export default function GymTracker() {
         .nav-btn  { transition: all 0.15s; }
         .nav-btn:active  { transform: scale(0.95); }
       `}</style>
-
       {/* ── Header ── */}
       <div style={{ background: "#0A0A0A", borderBottom: "1px solid #1E1E1E", padding: "14px 16px 10px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: "#FFF", letterSpacing: 2, lineHeight: 1 }}>MASS METHOD</div>
-            <div style={{ fontFamily: "'DM Sans'", fontSize: 11, color: "#666", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>Push · Pull · Legs — Phase 2 · 6 Week</div>
+            <div style={{ fontFamily: "'DM Sans'", fontSize: 11, color: "#666", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>5-Day Split · Legs Priority · 6 Week</div>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             <button className="nav-btn" onClick={() => setView("workout")}
@@ -262,7 +240,6 @@ export default function GymTracker() {
           </div>
         </div>
       </div>
-
       {view === "workout" ? (
         <>
           {/* ── Day Tabs ── */}
@@ -287,7 +264,6 @@ export default function GymTracker() {
               })}
             </div>
           </div>
-
           {/* ── Day title + week selector ── */}
           <div style={{ background: day.color, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
@@ -304,7 +280,6 @@ export default function GymTracker() {
               <button onClick={() => setActiveWeek(w => Math.min(12, w + 1))} style={{ ...styles.wkBtn, color: day.accent }}>›</button>
             </div>
           </div>
-
           {/* ── Progress bar ── */}
           <div style={{ background: "#111", padding: "8px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ flex: 1, background: "#222", borderRadius: 4, height: 6, overflow: "hidden" }}>
@@ -312,7 +287,6 @@ export default function GymTracker() {
             </div>
             <div style={{ fontFamily: "'DM Sans'", fontSize: 11, color: "#666", whiteSpace: "nowrap" }}>{doneSets}/{totalSetsForDay} sets</div>
           </div>
-
           {/* ── Exercises ── */}
           <div style={{ flex: 1, overflowY: "auto", padding: "8px 12px 100px" }}>
             {day.exercises.map((ex, ei) => (
@@ -330,13 +304,11 @@ export default function GymTracker() {
                     cue
                   </button>
                 </div>
-
                 {showCue === `${ei}` && (
                   <div style={{ padding: "8px 14px", background: "#1A1A1A", borderBottom: "1px solid #222" }}>
                     <div style={{ fontFamily: "'DM Sans'", fontSize: 12, color: day.accent, fontStyle: "italic" }}>💡 {ex.cue}</div>
                   </div>
                 )}
-
                 <div style={{ padding: "6px 10px 8px" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "28px 1fr 1fr 32px", gap: 6, padding: "4px 0 6px", borderBottom: "1px solid #1A1A1A", marginBottom: 6 }}>
                     <div />
@@ -380,7 +352,6 @@ export default function GymTracker() {
                 </div>
               </div>
             ))}
-
             {/* ── Bodyweight ── */}
             <div style={{ borderRadius: 12, border: "1px solid #2A1A1A", background: "#0F0A0A", padding: "12px 14px", marginBottom: 10 }}>
               <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 13, color: "#CCC", marginBottom: 8 }}>📊 Bodyweight this week</div>
@@ -388,7 +359,6 @@ export default function GymTracker() {
                 onChange={e => setBw(activeWeek, e.target.value)}
                 style={{ ...styles.input, width: "100%", borderColor: "#3A1A1A" }} />
             </div>
-
             {/* ── Cardio Finisher ── */}
             <div style={{ borderRadius: 12, border: "1px solid #1A2A1A", background: "#090F09", padding: "12px 14px" }}>
               <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 13, color: "#CCC", marginBottom: 4 }}>🚶 Cardio Finisher</div>
@@ -402,7 +372,6 @@ export default function GymTracker() {
         <div style={{ flex: 1, overflowY: "auto", padding: "12px 12px 80px" }}>
           <div style={{ fontFamily: "'Bebas Neue'", fontSize: 24, color: "#FFF", letterSpacing: 2, marginBottom: 4, padding: "0 4px" }}>Progress Tracker</div>
           <div style={{ fontFamily: "'DM Sans'", fontSize: 11, color: "#555", marginBottom: 16, padding: "0 4px" }}>Top lift per week — enter your heaviest working set</div>
-
           {/* Bodyweight chart */}
           <div style={{ borderRadius: 12, border: "1px solid #2A1A1A", background: "#0F0A0A", padding: "14px", marginBottom: 12 }}>
             <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 13, color: "#D4A017", marginBottom: 10 }}>⚖️ Bodyweight (lbs) — Goal: 190 → 180</div>
@@ -429,15 +398,14 @@ export default function GymTracker() {
               ))}
             </div>
           </div>
-
           {/* Key lifts */}
           {[
-            { day: "Push Day 1", ex: 0, label: "Smith Bench Press" },
-            { day: "Push Day 2", ex: 0, label: "Overhead Press" },
-            { day: "Leg Day 1",  ex: 0, label: "Back Squat" },
-            { day: "Leg Day 2",  ex: 0, label: "Romanian DL" },
-            { day: "Pull Day 1", ex: 0, label: "Weighted Pull-Ups" },
-            { day: "Pull Day 1", ex: 1, label: "Single Arm Row" },
+            { day: "Leg Day 1",    ex: 0, label: "Hack Squat" },
+            { day: "Push Day",     ex: 0, label: "Incline Smith Press" },
+            { day: "Pull Day",     ex: 0, label: "Single-Arm Cable Row" },
+            { day: "Pull Day",     ex: 1, label: "Weighted Pull-Ups" },
+            { day: "Leg Day 2",    ex: 0, label: "Romanian Deadlift" },
+            { day: "Shoulder Day", ex: 0, label: "Overhead Press" },
           ].map(({ day: d, ex: ei, label }) => {
             const prog = PROGRAM[d];
             const ex = prog.exercises[ei];
@@ -450,7 +418,7 @@ export default function GymTracker() {
             const minW = filled.length ? Math.min(...filled) : 0;
             const trend = filled.length >= 2 ? filled[filled.length - 1] - filled[0] : 0;
             return (
-              <div key={label} style={{ borderRadius: 12, border: `1px solid ${prog.color}88`, background: "#0D0D0D", padding: "12px 14px", marginBottom: 8 }}>
+              <div key={`${d}-${ei}`} style={{ borderRadius: 12, border: `1px solid ${prog.color}88`, background: "#0D0D0D", padding: "12px 14px", marginBottom: 8 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div style={{ fontFamily: "'DM Sans'", fontWeight: 600, fontSize: 13, color: "#DDD" }}>{label}</div>
                   {filled.length >= 2 && (
@@ -483,7 +451,6 @@ export default function GymTracker() {
     </div>
   );
 }
-
 const styles = {
   root: {
     background: "#0A0A0A",
